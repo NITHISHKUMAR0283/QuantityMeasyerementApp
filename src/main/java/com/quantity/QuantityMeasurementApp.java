@@ -4,7 +4,9 @@ public class QuantityMeasurementApp {
 
     public enum LengthUnit {
         FEET(1.0),
-        INCH(1.0 / 12.0);
+        INCH(1.0 / 12.0),
+        YARD(3.0), // 1 yard = 3 feet
+        CENTIMETER(1.0 / 30.48); // 1 cm = 0.393701 in = 1/2.54 in, 1 in = 1/12 ft, so 1 cm = 1/30.48 ft
 
         private final double toFeetFactor;
 
@@ -65,5 +67,13 @@ public class QuantityMeasurementApp {
         System.out.println("Feet: 1.0 and Inch: 12.0 Equal? " + areLengthsEqual(1.0, LengthUnit.FEET, 12.0, LengthUnit.INCH));
         // Inch to Feet
         System.out.println("Inch: 12.0 and Feet: 1.0 Equal? " + areLengthsEqual(12.0, LengthUnit.INCH, 1.0, LengthUnit.FEET));
+        // Yard to Feet
+        System.out.println("Yard: 1.0 and Feet: 3.0 Equal? " + areLengthsEqual(1.0, LengthUnit.YARD, 3.0, LengthUnit.FEET));
+        // Yard to Inch
+        System.out.println("Yard: 1.0 and Inch: 36.0 Equal? " + areLengthsEqual(1.0, LengthUnit.YARD, 36.0, LengthUnit.INCH));
+        // Centimeter to Inch
+        System.out.println("Centimeter: 1.0 and Inch: 0.393701 Equal? " + areLengthsEqual(1.0, LengthUnit.CENTIMETER, 0.393701, LengthUnit.INCH));
+        // Centimeter to Centimeter
+        System.out.println("Centimeter: 2.0 and Centimeter: 2.0 Equal? " + areLengthsEqual(2.0, LengthUnit.CENTIMETER, 2.0, LengthUnit.CENTIMETER));
     }
 }
