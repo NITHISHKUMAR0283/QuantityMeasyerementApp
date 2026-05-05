@@ -74,15 +74,16 @@
             return String.format("%.6f %s", value, unit);
         }
     }
+
 package com.quantity;
 
 public class QuantityMeasurementApp {
 
-    public enum LengthUnit {
+    public enum LengthUnit implements IMeasurable {
         FEET(1.0),
         INCH(1.0 / 12.0),
-        YARD(3.0), // 1 yard = 3 feet
-        CENTIMETER(1.0 / 30.48); // 1 cm = 0.393701 in = 1/2.54 in, 1 in = 1/12 ft, so 1 cm = 1/30.48 ft
+        YARD(3.0),
+        CENTIMETER(1.0 / 30.48);
 
         private final double toFeetFactor;
 
@@ -90,66 +91,88 @@ public class QuantityMeasurementApp {
             this.toFeetFactor = toFeetFactor;
         }
 
-        public double toFeet(double value) {
+        @Override
+        public double getConversionFactor() {
+            return toFeetFactor;
+        }
+
+        @Override
+        public double convertToBaseUnit(double value) {
             return value * toFeetFactor;
         }
-    }
 
-    public static class QuantityLength {
-        private final double value;
-        private final LengthUnit unit;
-
-        public QuantityLength(double value, LengthUnit unit) {
-            if (unit == null) throw new IllegalArgumentException("Unit cannot be null");
-            this.value = value;
-            this.unit = unit;
-        }
-
-        public double getValue() {
-            return value;
-        }
-
-        public LengthUnit getUnit() {
-            return unit;
+        @Override
+        public double convertFromBaseUnit(double baseValue) {
+            return baseValue / toFeetFactor;
         }
 
         @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            QuantityLength other = (QuantityLength) obj;
-            // Compare after converting both to feet
-            return Double.compare(this.unit.toFeet(this.value), other.unit.toFeet(other.value)) == 0;
-        }
-
-        @Override
-        public int hashCode() {
-            return Double.hashCode(unit.toFeet(value));
+        public String getUnitName() {
+            return name();
         }
     }
 
-    public static boolean areLengthsEqual(double v1, LengthUnit u1, double v2, LengthUnit u2) {
-        QuantityLength q1 = new QuantityLength(v1, u1);
-        QuantityLength q2 = new QuantityLength(v2, u2);
-        return q1.equals(q2);
+
+    public enum WeightUnit implements IMeasurable {
+        KILOGRAM(1.0),
+        GRAM(0.001),
+        POUND(0.453592);
+
+        private final double toKgFactor;
+
+        WeightUnit(double toKgFactor) {
+            this.toKgFactor = toKgFactor;
+        }
+
+        @Override
+        public double getConversionFactor() {
+            return toKgFactor;
+        }
+
+        @Override
+        public double convertToBaseUnit(double value) {
+            return value * toKgFactor;
+        }
+
+        @Override
+        public double convertFromBaseUnit(double baseValue) {
+            return baseValue / toKgFactor;
+        }
+
+        @Override
+        public String getUnitName() {
+            return name();
+        }
     }
 
     public static void main(String[] args) {
-        // Feet to Feet
-        System.out.println("Feet: 1.0 and 1.0 Equal? " + areLengthsEqual(1.0, LengthUnit.FEET, 1.0, LengthUnit.FEET));
-        // Inch to Inch
-        System.out.println("Inch: 1.0 and 1.0 Equal? " + areLengthsEqual(1.0, LengthUnit.INCH, 1.0, LengthUnit.INCH));
-        // Feet to Inch
-        System.out.println("Feet: 1.0 and Inch: 12.0 Equal? " + areLengthsEqual(1.0, LengthUnit.FEET, 12.0, LengthUnit.INCH));
-        // Inch to Feet
-        System.out.println("Inch: 12.0 and Feet: 1.0 Equal? " + areLengthsEqual(12.0, LengthUnit.INCH, 1.0, LengthUnit.FEET));
-        // Yard to Feet
-        System.out.println("Yard: 1.0 and Feet: 3.0 Equal? " + areLengthsEqual(1.0, LengthUnit.YARD, 3.0, LengthUnit.FEET));
-        // Yard to Inch
-        System.out.println("Yard: 1.0 and Inch: 36.0 Equal? " + areLengthsEqual(1.0, LengthUnit.YARD, 36.0, LengthUnit.INCH));
-        // Centimeter to Inch
-        System.out.println("Centimeter: 1.0 and Inch: 0.393701 Equal? " + areLengthsEqual(1.0, LengthUnit.CENTIMETER, 0.393701, LengthUnit.INCH));
-        // Centimeter to Centimeter
-        System.out.println("Centimeter: 2.0 and Centimeter: 2.0 Equal? " + areLengthsEqual(2.0, LengthUnit.CENTIMETER, 2.0, LengthUnit.CENTIMETER));
+        // Length equality
+        var l1 = new Quantity<>(1.0, LengthUnit.FEET);
+        var l2 = new Quantity<>(12.0, LengthUnit.INCH);
+        System.out.println("1.0 FEET == 12.0 INCH? " + l1.equals(l2));
+
+        // Length conversion
+        var l3 = l1.convertTo(LengthUnit.INCH);
+        System.out.println("1.0 FEET in INCHES: " + l3);
+
+        // Length addition
+        var l4 = l1.add(l2, LengthUnit.FEET);
+        System.out.println("1.0 FEET + 12.0 INCHES in FEET: " + l4);
+
+        // Weight equality
+        var w1 = new Quantity<>(1.0, WeightUnit.KILOGRAM);
+        var w2 = new Quantity<>(1000.0, WeightUnit.GRAM);
+        System.out.println("1.0 KILOGRAM == 1000.0 GRAM? " + w1.equals(w2));
+
+        // Weight conversion
+        var w3 = w1.convertTo(WeightUnit.GRAM);
+        System.out.println("1.0 KILOGRAM in GRAMS: " + w3);
+
+        // Weight addition
+        var w4 = w1.add(w2, WeightUnit.KILOGRAM);
+        System.out.println("1.0 KILOGRAM + 1000.0 GRAM in KILOGRAM: " + w4);
+
+        // Cross-category comparison (should be false)
+        System.out.println("1.0 FEET == 1.0 KILOGRAM? " + l1.equals(w1));
     }
 }
