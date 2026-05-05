@@ -1,3 +1,79 @@
+    public enum WeightUnit {
+        KILOGRAM(1.0),
+        GRAM(0.001),
+        POUND(0.453592); // 1 lb ≈ 0.453592 kg
+
+        private final double toKgFactor;
+
+        WeightUnit(double toKgFactor) {
+            this.toKgFactor = toKgFactor;
+        }
+
+        public double toKilogram(double value) {
+            return value * toKgFactor;
+        }
+
+        public double fromKilogram(double kgValue) {
+            return kgValue / toKgFactor;
+        }
+    }
+
+    public static class QuantityWeight {
+        private final double value;
+        private final WeightUnit unit;
+
+        public QuantityWeight(double value, WeightUnit unit) {
+            if (unit == null) throw new IllegalArgumentException("Unit cannot be null");
+            if (Double.isNaN(value) || Double.isInfinite(value)) throw new IllegalArgumentException("Value must be a finite number");
+            this.value = value;
+            this.unit = unit;
+        }
+
+        public double getValue() {
+            return value;
+        }
+
+        public WeightUnit getUnit() {
+            return unit;
+        }
+
+        public QuantityWeight convertTo(WeightUnit targetUnit) {
+            if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
+            double kgValue = unit.toKilogram(value);
+            double targetValue = targetUnit.fromKilogram(kgValue);
+            return new QuantityWeight(targetValue, targetUnit);
+        }
+
+        public QuantityWeight add(QuantityWeight other) {
+            return add(other, this.unit);
+        }
+
+        public QuantityWeight add(QuantityWeight other, WeightUnit targetUnit) {
+            if (other == null) throw new IllegalArgumentException("Other quantity cannot be null");
+            if (targetUnit == null) throw new IllegalArgumentException("Target unit cannot be null");
+            double sumKg = this.unit.toKilogram(this.value) + other.unit.toKilogram(other.value);
+            double resultValue = targetUnit.fromKilogram(sumKg);
+            return new QuantityWeight(resultValue, targetUnit);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj == null || getClass() != obj.getClass()) return false;
+            QuantityWeight other = (QuantityWeight) obj;
+            return Double.compare(this.unit.toKilogram(this.value), other.unit.toKilogram(other.value)) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            return Double.hashCode(unit.toKilogram(value));
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%.6f %s", value, unit);
+        }
+    }
 package com.quantity;
 
 public class QuantityMeasurementApp {
