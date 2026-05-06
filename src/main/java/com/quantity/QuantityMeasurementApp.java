@@ -56,11 +56,18 @@ public class QuantityMeasurementApp {
             if (other == null) {
                 throw new IllegalArgumentException("Invalid operand");
             }
-            double thisFeet = this.unit.toFeet(this.value);
-            double otherFeet = other.unit.toFeet(other.value);
-            double sumFeet = thisFeet + otherFeet;
+            double sumFeet = this.unit.toFeet(this.value) + other.unit.toFeet(other.value);
             double resultValue = this.unit.fromFeet(sumFeet);
             return new QuantityLength(resultValue, this.unit);
+        }
+
+        public QuantityLength add(QuantityLength other, LengthUnit targetUnit) {
+            if (other == null || targetUnit == null) {
+                throw new IllegalArgumentException("Invalid input");
+            }
+            double sumFeet = this.unit.toFeet(this.value) + other.unit.toFeet(other.value);
+            double resultValue = targetUnit.fromFeet(sumFeet);
+            return new QuantityLength(resultValue, targetUnit);
         }
 
         @Override
@@ -96,15 +103,20 @@ public class QuantityMeasurementApp {
         return q1.add(q2);
     }
 
+    public static QuantityLength add(double v1, LengthUnit u1, double v2, LengthUnit u2, LengthUnit targetUnit) {
+        QuantityLength q1 = new QuantityLength(v1, u1);
+        QuantityLength q2 = new QuantityLength(v2, u2);
+        return q1.add(q2, targetUnit);
+    }
+
     public static void main(String[] args) {
         QuantityLength q1 = new QuantityLength(1.0, LengthUnit.FEET);
         QuantityLength q2 = new QuantityLength(12.0, LengthUnit.INCH);
-        System.out.println(q1.add(q2));
 
-        QuantityLength q3 = new QuantityLength(1.0, LengthUnit.YARD);
-        QuantityLength q4 = new QuantityLength(3.0, LengthUnit.FEET);
-        System.out.println(q3.add(q4));
+        System.out.println(q1.add(q2, LengthUnit.FEET));
+        System.out.println(q1.add(q2, LengthUnit.INCH));
+        System.out.println(q1.add(q2, LengthUnit.YARD));
 
-        System.out.println(add(12.0, LengthUnit.INCH, 1.0, LengthUnit.FEET));
+        System.out.println(add(1.0, LengthUnit.FEET, 12.0, LengthUnit.INCH, LengthUnit.INCH));
     }
 }
